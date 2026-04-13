@@ -114,6 +114,20 @@ img {
     0% { transform: translateY(0); opacity: 1; }
     100% { transform: translateY(80px); opacity: 0; }
 }
+
+/* 🔴 YAZI (KİŞİNİN ÜSTÜNDE) */
+.big-text {
+    position: absolute;
+    top: 20%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 100px;
+    font-weight: bold;
+    color: red;
+    z-index: 1000;
+    pointer-events: none;
+    text-shadow: 0 0 20px rgba(255,0,0,0.7);
+}
 </style>
 </head>
 
@@ -127,6 +141,10 @@ img {
 </div>
 
 <div id="container">
+
+    <!-- 🔴 BURAYA EKLENDİ (ARTIK KİŞİNİN ÜSTÜNDE) -->
+    <div class="big-text">BENİ DÖV!</div>
+
     <img id="photo" src="gorsel.jpg">
 </div>
 
@@ -152,7 +170,7 @@ function spawnPunch() {
 
     const rect = photo.getBoundingClientRect();
 
-    const extra = 48; // 🔥 120 / 2.5 = 48
+    const extra = 48;
 
     const x = rect.left - extra + Math.random() * (rect.width + extra * 2);
     const y = rect.top - extra + Math.random() * (rect.height + extra * 2);
