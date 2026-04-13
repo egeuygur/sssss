@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<title>Yumruk Oyunu</title>
+
+<style>
+body {
+    margin: 0;
+    background: white;
+    font-family: Arial, sans-serif;
+    overflow: hidden;
+}
+
+#ui {
+    position: fixed;
+    top: 10px;
+    left: 10px;
+    color: black;
+    font-size: 18px;
+    z-index: 1000;
+}
+
+#container {
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+}
+
+img {
+    width: 800px;
+    height: 800px;
+    object-fit: cover;
+    border-radius: 20px;
+    cursor: pointer;
+}
+
+.hit {
+    animation: shake 0.25s;
+}
+
+@keyframes shake {
+    0% { transform: translate(0,0); }
+    25% { transform: translate(-8px, 8px); }
+    50% { transform: translate(8px, -8px); }
+    75% { transform: translate(-8px, 8px); }
+    100% { transform: translate(0,0); }
+}
+
+#flash {
+    position: fixed;
+    inset: 0;
+    background: red;
+    opacity: 0;
+    pointer-events: none;
+    z-index: 1;
+}
+
+.flash-active {
+    animation: flash 0.25s;
+}
+
+@keyframes flash {
+    0% { opacity: 0.4; }
+    100% { opacity: 0; }
+}
+
+/* 💥 ÖZÜR YAZISI (BÜYÜK) */
+.sorry {
+    position: fixed;
+    color: black;
+    font-weight: bold;
+    pointer-events: none;
+    animation: up 1s forwards;
+    z-index: 999;
+    font-size: 64px;
+}
+
+@keyframes up {
+    0% { opacity: 1; transform: translateY(0); }
+    100% { opacity: 0; transform: translateY(-40px); }
+}
+
+/* 💥 YUMRUK */
+.punch {
+    position: fixed;
+    width: 216px;
+    height: 216px;
+    background: url("yumruk.png") no-repeat center/contain;
+    z-index: 999;
+    pointer-events: none;
+    animation: punchAnim 0.25s forwards;
+}
+
+@keyframes punchAnim {
+    0% { transform: scale(0.5); opacity: 1; }
+    100% { transform: scale(1.5); opacity: 0; }
+}
+
+/* 😢 GÖZYAŞI (RESİM) */
+.tear {
+    position: fixed;
+    width: 24px;
+    height: 24px;
+    background: url("gozyasi.png") no-repeat center/contain;
+    pointer-events: none;
+    z-index: 999;
+    animation: tearAnim 1s forwards;
+}
+
+@keyframes tearAnim {
+    0% { transform: translateY(0); opacity: 1; }
+    100% { transform: translateY(80px); opacity: 0; }
+}
+</style>
+</head>
+
+<body>
+
+<div id="flash"></div>
+
+<div id="ui">
+    <div id="score">Skor: 0</div>
+    <div id="combo">Combo: 0</div>
+</div>
+
+<div id="container">
+    <img id="photo" src="gorsel.jpg">
+</div>
+
+<audio id="hitSound" src="https://www.soundjay.com/human/slap-01.mp3"></audio>
+
+<script>
+
+const photo = document.getElementById("photo");
+const flash = document.getElementById("flash");
+const hitSound = document.getElementById("hitSound");
+
+const scoreText = document.getElementById("score");
+const comboText = document.getElementById("combo");
+
+let score = 0;
+let combo = 0;
+let lastClick = 0;
+
+/* 💥 YUMRUK (DARALTILMIŞ ALAN) */
+function spawnPunch() {
+    const punch = document.createElement("div");
+    punch.className = "punch";
+
+    const rect = photo.getBoundingClientRect();
+
+    const extra = 48; // 🔥 120 / 2.5 = 48
+
+    const x = rect.left - extra + Math.random() * (rect.width + extra * 2);
+    const y = rect.top - extra + Math.random() * (rect.height + extra * 2);
+
+    punch.style.left = (x - 108) + "px";
+    punch.style.top = (y - 108) + "px";
+
+    document.body.appendChild(punch);
+
+    setTimeout(() => punch.remove(), 250);
+}
+
+/* 😢 GÖZYAŞI */
+function spawnTear() {
+    const tear = document.createElement("div");
+    tear.className = "tear";
+
+    const rect = photo.getBoundingClientRect();
+
+    const x = rect.left + Math.random() * rect.width;
+    const y = rect.top + rect.height * 0.2;
+
+    tear.style.left = (x - 6) + "px";
+    tear.style.top = (y - 10) + "px";
+
+    document.body.appendChild(tear);
+
+    setTimeout(() => tear.remove(), 1000);
+}
+
+/* CLICK */
+photo.addEventListener("click", () => {
+
+    const now = Date.now();
+
+    if (now - lastClick < 1000) combo++;
+    else combo = 1;
+
+    lastClick = now;
+
+    if (navigator.vibrate) navigator.vibrate(80);
+
+    hitSound.currentTime = 0;
+    hitSound.play();
+
+    flash.classList.add("flash-active");
+    setTimeout(() => flash.classList.remove("flash-active"), 250);
+
+    score += combo;
+
+    scoreText.innerText = "Skor: " + score;
+    comboText.innerText = "Combo: " + combo;
+
+    photo.classList.add("hit");
+    setTimeout(() => photo.classList.remove("hit"), 250);
+
+    spawnPunch();
+    spawnTear();
+
+    const rect = photo.getBoundingClientRect();
+    const text = document.createElement("div");
+    text.className = "sorry";
+    text.innerText = "😢 Özür dilerim!";
+
+    text.style.left = rect.left + Math.random() * rect.width + "px";
+    text.style.top = rect.top + Math.random() * rect.height + "px";
+
+    document.body.appendChild(text);
+    setTimeout(() => text.remove(), 900);
+});
+
+</script>
+
+</body>
+</html>
